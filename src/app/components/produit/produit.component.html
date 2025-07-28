@@ -110,21 +110,23 @@
 
                     <!-- Statut -->
                     <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-info-circle mr-2"></i>
-                            Statut
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="Statut" 
-                            [(ngModel)]="filterStatus" 
-                            name="filterStatus"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                        />
-                    </div>
-
-                    <!-- Vedette -->
-                    <div>
+                          <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Statut
+                          </label>
+                          <select 
+                                [(ngModel)]="filterStatus" 
+                                name="filterStatus"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                          >
+                                <option [ngValue]="null">Tous</option>
+                                <option [ngValue]="'publish'" selected>Publié</option>
+                                <option [ngValue]="'draft'">Brouillon</option>
+                                <option [ngValue]="'private'">Privé</option>
+                          </select>
+                     </div>        
+                     
+                     <div>
                         <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
                             <i class="fas fa-star mr-2"></i>
                             Vedette
@@ -173,11 +175,11 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         <tr *ngFor="let p of products" class="hover:bg-gray-50 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <img 
-                                    [src]="p.image_url || 'assets/placeholder.png'" 
-                                    [alt]="p.name"
-                                    class="h-12 w-12 rounded-lg object-cover"
-                                />
+                             <img 
+         [src]="p.images?.length ? p.images[0].src : '../../../assets/1719256397355-removebg-preview.png'" 
+        [alt]="p.name || 'Product image'" 
+     class="h-12 w-12 rounded-lg object-cover"
+                            />
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-medium text-gray-900">{{ p.name }}</div>

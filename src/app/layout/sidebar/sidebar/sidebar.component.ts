@@ -47,4 +47,11 @@ export class SidebarComponent {
     this.router.navigate(['/produits']);
     this.closeSidebar();
   }
+  onUserProfileClick(): void {
+  localStorage.clear();
+  console.log('Local storage cleared');
+  // Optionally redirect the user, for example:
+  this.router.navigate(['']);
+}
+
 }
