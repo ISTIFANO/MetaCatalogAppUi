@@ -1,0 +1,232 @@
+
+        <div class="mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-box text-blue-600"></i>
+                    <span class="text-gray-600">Produits</span>
+                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+                    <span class="font-medium">Liste des produits</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button class="flex items-center space-x-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Synchroniser avec Meta</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-lg shadow-sm border">
+                <div class="text-sm text-gray-600 mb-1">Total produits</div>
+                <div class="text-2xl font-semibold text-gray-900">{{ stats?.total_products || 0 }}</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm border">
+                <div class="text-sm text-gray-600 mb-1">En stock</div>
+                <div class="text-2xl font-semibold text-green-600">{{ stats?.in_stock_products || 0 }}</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm border">
+                <div class="text-sm text-gray-600 mb-1">Produits publiés</div>
+                <div class="text-2xl font-semibold text-blue-600">{{ stats?.published_products || 0 }}</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm border">
+                <div class="text-sm text-gray-600 mb-1">Valeur totale</div>
+                <div class="text-2xl font-semibold text-gray-900">{{ stats?.total_value }}</div>
+            </div>
+            <div class="bg-white p-4 rounded-lg shadow-sm border">
+                <div class="text-sm text-gray-600 mb-1">Prix moyen</div>
+                <div class="text-2xl font-semibold text-gray-900">{{ stats?.average_price }}</div>
+            </div>
+        </div>
+
+        <!-- Filter Form -->
+        <div class="bg-white rounded-lg shadow-sm border mb-6">
+            <form class="p-6" (submit)="applyFilters(); $event.preventDefault();">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                    <!-- Recherche nom produit -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-search mr-2"></i>
+                            Nom du produit
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Recherche nom produit" 
+                            [(ngModel)]="filterName" 
+                            name="filterName"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                        />
+                    </div>
+
+                    <!-- Statut Stock -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-warehouse mr-2"></i>
+                            Statut Stock
+                        </label>
+                        <select 
+                            [(ngModel)]="filterInStock" 
+                            name="filterInStock"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                        >
+                            <option [ngValue]="null">Tous</option>
+                            <option [ngValue]="'instock'">En stock</option>
+                            <option [ngValue]="'outofstock'">Rupture de stock</option>
+                        </select>
+                    </div>
+
+                    <!-- En solde -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-percentage mr-2"></i>
+                            En solde
+                        </label>
+                        <select 
+                            [(ngModel)]="filterOnSale" 
+                            name="filterOnSale"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                        >
+                            <option [ngValue]="null">Tous</option>
+                            <option [ngValue]="'true'">Oui</option>
+                            <option [ngValue]="'false'">Non</option>
+                        </select>
+                    </div>
+
+                    <!-- Catégorie -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-list mr-2"></i>
+                            Catégorie
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Catégorie" 
+                            [(ngModel)]="filterCategory" 
+                            name="filterCategory"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                        />
+                    </div>
+
+                    <!-- Statut -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Statut
+                        </label>
+                        <input 
+                            type="text" 
+                            placeholder="Statut" 
+                            [(ngModel)]="filterStatus" 
+                            name="filterStatus"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+                        />
+                    </div>
+
+                    <!-- Vedette -->
+                    <div>
+                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-star mr-2"></i>
+                            Vedette
+                        </label>
+                        <select 
+                            [(ngModel)]="filterFeatured" 
+                            name="filterFeatured"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
+                        >
+                            <option [ngValue]="null">Tous</option>
+                            <option [ngValue]="'true'">Oui</option>
+                            <option [ngValue]="'false'">Non</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter Button -->
+                <div class="flex justify-end">
+                    <button 
+                        type="submit"
+                        class="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        <i class="fas fa-filter"></i>
+                        <span>Filtrer</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Products Table -->
+        <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">En solde</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vedette</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voir</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr *ngFor="let p of products" class="hover:bg-gray-50 transition-colors">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <img 
+                                    [src]="p.image_url || 'assets/placeholder.png'" 
+                                    [alt]="p.name"
+                                    class="h-12 w-12 rounded-lg object-cover"
+                                />
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ p.name }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">{{ p.price }} {{ p.currency || 'EUR' }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                    {{ p.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm" [class]="p.stock_status === 'instock' ? 'text-green-600' : 'text-red-600'">
+                                    {{ p.stock_status === 'instock' ? 'Oui' : 'Non' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm" [class]="p.on_sale ? 'text-orange-600' : 'text-gray-600'">
+                                    {{ p.on_sale ? 'Oui' : 'Non' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-sm" [class]="p.featured ? 'text-yellow-600' : 'text-gray-600'">
+                                    {{ p.featured ? 'Oui' : 'Non' }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <a 
+                                    [href]="p.permalink" 
+                                    target="_blank"
+                                    class="text-blue-600 hover:text-blue-800 font-medium"
+                                >
+                                    Voir
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Submit Catalog Button -->
+        <div class="mt-6 flex justify-center">
+            <button 
+                (click)="submitCatalog()"
+                class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+            >
+                <i class="fas fa-paper-plane mr-2"></i>
+                Envoyer catalogue
+            </button>
+        </div>

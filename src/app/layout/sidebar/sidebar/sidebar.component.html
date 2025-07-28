@@ -1,0 +1,57 @@
+<div class="sidebar-overlay" 
+     [class.active]="isSidebarOpen"
+     (click)="closeSidebar()">
+</div>
+
+<aside class="sidebar" [class.open]="isSidebarOpen">
+  <div class="sidebar-header">
+    <img src="../../../../assets/1719256397355-removebg-preview.png" alt="Dashy" class="sidebar-logo">
+    <button class="close-btn" (click)="closeSidebar()">
+      <svg width="24" height="24" viewBox="0 0 24 24">
+        <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2"/>
+      </svg>
+    </button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li class="nav-item" [class.active]="activeSubmenu === 'produit'">
+        <a class="nav-link" (click)="toggleSubmenu('produit', $event)">
+          <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24">
+            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10" fill="none" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          <span class="nav-text">Produit</span>
+          <svg class="dropdown-arrow" [class.rotated]="activeSubmenu === 'produit'" width="12" height="12" viewBox="0 0 12 12">
+            <path d="M6 8L2 4h8L6 8z" fill="currentColor"/>
+          </svg>
+        </a>
+        <ul class="submenu" *ngIf="activeSubmenu === 'produit'">
+          <li><a (click)="navigateToProducts()">Tous les produits</a></li>
+          <li><a>Ajouter produit</a></li>
+          <li *ngFor="let product of fakeProducts">
+            <a>{{ product.name }}</a>
+          </li>
+        </ul>
+      </li>
+
+     <li class="nav-item">
+  <a class="nav-link" (click)="navigateToSettings()"> 
+    <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24">
+      <path d="M12 1l3 6 6 .75-4.12 4.62L18 19l-6-3-6 3 1.13-6.63L3 7.75 9 7z" fill="none" stroke="currentColor" stroke-width="2"/>
+    </svg>
+    <span class="nav-text">Paramètre</span>
+  </a>
+</li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-profile-sidebar">
+      <div class="user-avatar-large">M</div>
+      <div class="user-info">
+        <div class="user-name-large">Mvp User</div>
+        <div class="user-email">mvp.com</div>
+      </div>
+    </div>
+  </div>
+</aside>

@@ -1,0 +1,18 @@
+/* auth-popup.component.css */
+.auth-link {
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 4px;
+  word-break: break-all;
+}
+
+.auth-link a {
+  color: #3498db;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}

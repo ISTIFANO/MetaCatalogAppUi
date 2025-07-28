@@ -1,0 +1,250 @@
+/* Correction du fichier src/styles.css */
+
+/* IMPORTANT: Tous les @import doivent être en premier, avant les @tailwind */
+
+/* 1. Imports des librairies externes d'abord */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'ngx-toastr/toastr';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import 'flowbite/dist/flowbite.min.css';
+
+/* 2. Ensuite les directives Tailwind */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3. Styles personnalisés après */
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', 'Roboto', sans-serif;
+  background-color: #f8fafc;
+}
+
+/* Override Angular Material avec Tailwind */
+.mat-mdc-card {
+  @apply rounded-lg shadow-md border-0;
+}
+
+.mat-mdc-raised-button {
+  @apply rounded-lg font-medium;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  @apply bg-teal-600 hover:bg-teal-700;
+}
+
+.mat-mdc-icon-button {
+  @apply rounded-lg;
+}
+
+.mat-mdc-form-field {
+  @apply w-full;
+}
+
+/* Styles pour les cartes produits */
+.product-card {
+  @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden;
+}
+
+.product-card:hover {
+  @apply transform -translate-y-1;
+}
+
+/* Styles pour les statistiques */
+.stat-card {
+  @apply bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300;
+}
+
+/* Styles pour les chips de statut */
+.status-chip {
+  @apply px-3 py-1 rounded-full text-sm font-medium;
+}
+
+.status-chip.available {
+  @apply bg-green-100 text-green-800;
+}
+
+.status-chip.out-of-stock {
+  @apply bg-red-100 text-red-800;
+}
+
+.status-chip.low-stock {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+/* Styles pour les boutons personnalisés */
+.btn-primary {
+  @apply bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+.btn-danger {
+  @apply bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200;
+}
+
+/* Styles pour les tableaux */
+.data-table {
+  @apply bg-white rounded-lg shadow-md overflow-hidden;
+}
+
+/* Animation pour les loaders */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Styles responsive */
+@media (max-width: 768px) {
+  .stat-card {
+    @apply p-4;
+  }
+  
+  .product-card {
+    @apply mx-2;
+  }
+}
+
+/* Fix pour ngx-toastr avec Tailwind */
+.toast-container {
+  z-index: 9999;
+}
+
+/* Override pour ngx-datatable */
+.ngx-datatable {
+  @apply bg-white rounded-lg shadow-md;
+}
+
+.datatable-header {
+  @apply bg-gray-50 border-b;
+}
+
+.datatable-row-even {
+  @apply bg-gray-50;
+}
+
+.datatable-row-odd {
+  @apply bg-white;
+}
+
+/* Styles pour les modales SweetAlert2 */
+.swal2-popup {
+  @apply rounded-lg;
+}
+
+.swal2-confirm {
+  @apply bg-teal-600 hover:bg-teal-700;
+}
+
+/* Styles utilitaires supplémentaires */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Styles pour les transitions fluides */
+.transition-all {
+  transition: all 0.3s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Styles pour les badges */
+.badge-success {
+  @apply bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-danger {
+  @apply bg-red-100 text-red-800 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-info {
+  @apply bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium;
+}
+
+/* Styles pour les indicateurs de chargement */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600;
+}
+
+/* Styles pour les formulaires */
+.form-group {
+  @apply mb-4;
+}
+
+.form-label {
+  @apply block text-sm font-medium text-gray-700 mb-2;
+}
+
+.form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent;
+}
+
+.form-error {
+  @apply text-red-600 text-sm mt-1;
+}
+
+/* Styles pour les headers */
+.page-header {
+  @apply bg-white shadow-sm border-b border-gray-200 px-6 py-4;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+/* Styles pour la sidebar */
+.sidebar {
+  @apply bg-white shadow-lg border-r border-gray-200;
+}
+
+.sidebar-item {
+  @apply flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-teal-600 transition-colors duration-200;
+}
+
+.sidebar-item.active {
+  @apply bg-teal-50 text-teal-600 border-r-2 border-teal-600;
+}
+
+/* Styles pour les notifications */
+.notification-success {
+  @apply bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg;
+}
+
+.notification-error {
+  @apply bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg;
+}
+
+.notification-warning {
+  @apply bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg;
+}
+
+.notification-info {
+  @apply bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg;
+}
