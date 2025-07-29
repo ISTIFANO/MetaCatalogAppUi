@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductsService } from '../../services/ProductsService';
+import {CatalogService } from '../../services/CatalogService';
 
 @Component({
   selector: 'app-produit',
@@ -25,7 +26,7 @@ export class ProduitComponent implements OnInit {
   filterPerPage = 10;
   filterPage = 1;
 
-  constructor(private productService: ProductsService) {}
+  constructor(private productService: ProductsService,private catalogService : CatalogService) {}
 
   ngOnInit(): void {
     const saved = localStorage.getItem('woocommerceWebsite');
@@ -48,7 +49,11 @@ loadProducts(): void {
     page: this.filterPage
   };
   this.productService.fetchAllProducts(this.websiteUrl, filters).subscribe({
-    next: data => this.products = data.products,  
+
+
+  next: data => {
+      this.products = data.products;
+    },
 
     error: err => console.error('Fetch products error:', err)
   });
@@ -66,24 +71,32 @@ loadProducts(): void {
     this.loadProducts();
   }
 
-  submitCatalog(): void {
-    const payload = {
-      item_type: 'PRODUCT_ITEM',
-      allow_upsert: false,
-      requests: this.products.map((p, idx) => ({
-        method: 'CREATE',
-        retailer_id: `prod-${Date.now()}-${idx}`,
-        data: {
-          name: p.name,
-          description: p.description,
-          price: p.price,
-          currency: p.currency,
-          availability: p.stock_status || (p.stock_quantity > 0 ? 'in stock' : 'out of stock'),
-          image_url: p.images?.[0]?.src || p.image_url,
-          url: p.permalink || p.site_web
-        }
-      }))
-    };
-    console.log('Payload ready to send:', payload);
-  }
+submitCatalog(): void {
+  const payload = {
+    item_type: 'PRODUCT_ITEM',
+    allow_upsert: false,
+    requests: this.products.map((p, idx) => ({
+      method: 'CREATE',
+      retailer_id: `prod-${Date.now()}-${idx}`,
+      data: {
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        currency: p.currency,
+        availability: p.stock_status || (p.stock_quantity > 0 ? 'in stock' : 'out of stock'),
+        image_url: p.images?.[0]?.src || p.image_url,
+        url: p.permalink || p.site_web
+      }
+    }))
+  };
+
+  console.log('Payload ready to send:', payload);
+
+  this.catalogService.submitCatalog(payload).subscribe({
+    next: (res) => console.log('Success:', res),
+    error: (err) => console.error('Error:', err)
+  });
+}
+
+
 }
