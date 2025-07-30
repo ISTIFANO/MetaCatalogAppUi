@@ -45,7 +45,7 @@
     "ng-video-player": "^1.1.6",
     "ngx-skeleton-loader": "^8.1.0",
     "ngx-toastr": "^18.0.0",
-    "rxjs": "~7.8.0",
+    "rxjs": "^7.8.2",
     "sweetalert2": "^11.6.13",
     "tslib": "^2.3.0",
     "uuid": "^9.0.1",
@@ -66,5 +66,8 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.1",
     "typescript": "~5.4.2"
+  },
+  "resolutions": {
+    "rxjs": "^7.8.2"
   }
 }

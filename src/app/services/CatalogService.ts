@@ -11,10 +11,13 @@ export class CatalogService {
   constructor(private http: HttpClient) {}
 
   private getHeaders(): { headers: HttpHeaders } {
+    const catalogId = localStorage.getItem('catalogId') || '';
+    const token = localStorage.getItem('token')|| '';
     return {
       headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-        // 'Authorization': 'Bearer YOUR_TOKEN'
+        'Content-Type': 'application/json',
+        'CatalogId': catalogId,
+        'Authorization' : token
       })
     };
   }
