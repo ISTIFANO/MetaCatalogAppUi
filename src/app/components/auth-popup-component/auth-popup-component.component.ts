@@ -1,18 +1,21 @@
+// auth-popup.component.ts
 import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-
+import { NgFor } from '@angular/common';
+import { NgForm, NgModel } from '@angular/forms';
 @Component({
   standalone: true,
+   imports: [MatDialogModule, MatButtonModule],
   selector: 'app-auth-popup',
-  imports: [MatDialogModule, MatButtonModule],
   templateUrl: './auth-popup-component.component.html',
   styleUrls: ['./auth-popup-component.component.css']
 })
 export class AuthPopupComponent {
   constructor(
     public dialogRef: MatDialogRef<AuthPopupComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { authUrl: string; website: string }
+    @Inject(MAT_DIALOG_DATA) public data: { authUrl: string, website: string }
   ) {}
 
   onClose(): void {

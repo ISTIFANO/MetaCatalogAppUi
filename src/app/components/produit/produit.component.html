@@ -1,234 +1,302 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-box text-blue-600"></i>
+        <span class="text-gray-600">Produits</span>
+        <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+        <span class="font-medium">Liste des produits</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <!-- Actions pour les produits sélectionnés -->
+        <div *ngIf="getSelectedCount() > 0" class="flex items-center space-x-2 bg-blue-50 px-3 py-2 rounded-lg">
+          <span class="text-sm text-blue-700 font-medium">{{ getSelectedCount() }} sélectionné(s)</span>
+          <button
+            (click)="exportSelectedProducts()"
+            class="flex items-center space-x-1 px-3 py-1 text-xs bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+            <i class="fas fa-download"></i>
+            <span>Exporter</span>
+          </button>
+         
+        </div>
+        
+        <button
+         (click)="submitSelectedCatalog()"
+          [disabled]="syncLoading"
+          class="flex items-center space-x-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50">
+          <i class="fas fa-sync-alt" [class.fa-spin]="syncLoading"></i>
+          <span>Synchroniser tout</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
-        <div class="mb-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-box text-blue-600"></i>
-                    <span class="text-gray-600">Produits</span>
-                    <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
-                    <span class="font-medium">Liste des produits</span>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <button class="flex items-center space-x-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Synchroniser avec Meta</span>
-                    </button>
-                </div>
-            </div>
+  <!-- Filters Section -->
+  <div class="bg-white rounded-lg shadow-sm border mb-6">
+    <div class="p-6">
+      <!-- Search Bar -->
+      <div class="mb-6">
+        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
+          <i class="fas fa-search mr-2"></i>
+          Rechercher un produit
+        </label>
+        <div class="flex space-x-3">
+          <input
+            type="text"
+            placeholder="Nom du produit..."
+            [(ngModel)]="searchName"
+            (input)="applyFilters()"
+            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
+          />
+          <button
+            (click)="resetFilters()"
+            class="flex items-center space-x-2 px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+            <i class="fas fa-undo"></i>
+            <span>Réinitialiser</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Groups -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Dynamic Filter Groups -->
+        <div *ngFor="let group of filterGroups; let i = index" class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="flex items-center text-sm font-medium text-gray-700">
+              <i [class]="group.icon + ' mr-2'"></i>
+              {{ group.name }}
+            </h3>
+            <label class="flex items-center text-xs text-blue-600 cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="group.selectAll"
+                (change)="toggleSelectAll(i)"
+                class="mr-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Tout sélectionner
+            </label>
+          </div>
+          <div class="space-y-2">
+            <label *ngFor="let option of group.options" class="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="option.checked"
+                (change)="updateSelectAllState(i)"
+                class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-700">{{ option.label }}</span>
+            </label>
+          </div>
         </div>
 
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <div class="text-sm text-gray-600 mb-1">Total produits</div>
-                <div class="text-2xl font-semibold text-gray-900">{{ stats?.total_products || 0 }}</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <div class="text-sm text-gray-600 mb-1">En stock</div>
-                <div class="text-2xl font-semibold text-green-600">{{ stats?.in_stock_products || 0 }}</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <div class="text-sm text-gray-600 mb-1">Produits publiés</div>
-                <div class="text-2xl font-semibold text-blue-600">{{ stats?.published_products || 0 }}</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <div class="text-sm text-gray-600 mb-1">Valeur totale</div>
-                <div class="text-2xl font-semibold text-gray-900">{{ stats?.total_value }}</div>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border">
-                <div class="text-sm text-gray-600 mb-1">Prix moyen</div>
-                <div class="text-2xl font-semibold text-gray-900">{{ stats?.average_price }}</div>
-            </div>
+        <!-- Categories Filter -->
+        <div *ngIf="categoryFilters.length > 0" class="border border-gray-200 rounded-lg p-4">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="flex items-center text-sm font-medium text-gray-700">
+              <i class="fas fa-list mr-2"></i>
+              Catégories
+            </h3>
+            <label class="flex items-center text-xs text-blue-600 cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="categoriesSelectAll"
+                (change)="toggleCategoriesSelectAll()"
+                class="mr-1 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              Tout sélectionner
+            </label>
+          </div>
+          <div class="space-y-2 max-h-40 overflow-y-auto">
+            <label *ngFor="let category of categoryFilters" class="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                [(ngModel)]="category.checked"
+                (change)="updateCategoriesSelectAllState()"
+                class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span class="text-sm text-gray-700">{{ category.label }}</span>
+            </label>
+          </div>
         </div>
+      </div>
 
-        <!-- Filter Form -->
-        <div class="bg-white rounded-lg shadow-sm border mb-6">
-            <form class="p-6" (submit)="applyFilters(); $event.preventDefault();">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                    <!-- Recherche nom produit -->
-                    <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-search mr-2"></i>
-                            Nom du produit
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="Recherche nom produit" 
-                            [(ngModel)]="filterName" 
-                            name="filterName"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                        />
-                    </div>
-
-                    <!-- Statut Stock -->
-                    <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-warehouse mr-2"></i>
-                            Statut Stock
-                        </label>
-                        <select 
-                            [(ngModel)]="filterInStock" 
-                            name="filterInStock"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                        >
-                            <option [ngValue]="null">Tous</option>
-                            <option [ngValue]="'instock'">En stock</option>
-                            <option [ngValue]="'outofstock'">Rupture de stock</option>
-                        </select>
-                    </div>
-
-                    <!-- En solde -->
-                    <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-percentage mr-2"></i>
-                            En solde
-                        </label>
-                        <select 
-                            [(ngModel)]="filterOnSale" 
-                            name="filterOnSale"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                        >
-                            <option [ngValue]="null">Tous</option>
-                            <option [ngValue]="'true'">Oui</option>
-                            <option [ngValue]="'false'">Non</option>
-                        </select>
-                    </div>
-
-                    <!-- Catégorie -->
-                    <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-list mr-2"></i>
-                            Catégorie
-                        </label>
-                        <input 
-                            type="text" 
-                            placeholder="Catégorie" 
-                            [(ngModel)]="filterCategory" 
-                            name="filterCategory"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
-                        />
-                    </div>
-
-                    <!-- Statut -->
-                    <div>
-                          <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                                <i class="fas fa-info-circle mr-2"></i>
-                                Statut
-                          </label>
-                          <select 
-                                [(ngModel)]="filterStatus" 
-                                name="filterStatus"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                          >
-                                <option [ngValue]="null">Tous</option>
-                                <option [ngValue]="'publish'" selected>Publié</option>
-                                <option [ngValue]="'draft'">Brouillon</option>
-                                <option [ngValue]="'private'">Privé</option>
-                          </select>
-                     </div>        
-                     
-                     <div>
-                        <label class="flex items-center text-sm font-medium text-gray-700 mb-2">
-                            <i class="fas fa-star mr-2"></i>
-                            Vedette
-                        </label>
-                        <select 
-                            [(ngModel)]="filterFeatured" 
-                            name="filterFeatured"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
-                        >
-                            <option [ngValue]="null">Tous</option>
-                            <option [ngValue]="'true'">Oui</option>
-                            <option [ngValue]="'false'">Non</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Filter Button -->
-                <div class="flex justify-end">
-                    <button 
-                        type="submit"
-                        class="flex items-center space-x-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        <i class="fas fa-filter"></i>
-                        <span>Filtrer</span>
-                    </button>
-                </div>
-            </form>
+      <!-- Results Summary -->
+      <div class="mt-6 pt-4 border-t border-gray-200">
+        <div class="flex items-center justify-between text-sm text-gray-600">
+          <span>{{ products.length }} produit(s) trouvé(s) sur {{ allProducts.length }} total</span>
+          <div class="flex items-center space-x-4">
+            <span *ngIf="searchName" class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs">
+              Recherche: "{{ searchName }}"
+            </span>
+            <span *ngIf="getSelectedCount() > 0" class="bg-green-100 text-green-800 px-2 py-1 rounded-full text-xs">
+              {{ getSelectedCount() }} sélectionné(s)
+            </span>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <!-- Products Table -->
-        <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">En solde</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vedette</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Voir</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        <tr *ngFor="let p of products" class="hover:bg-gray-50 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                             <img 
-         [src]="p.images?.length ? p.images[0].src : '../../../assets/1719256397355-removebg-preview.png'" 
-        [alt]="p.name || 'Product image'" 
-     class="h-12 w-12 rounded-lg object-cover"
-                            />
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ p.name }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ p.price }} {{ p.currency || 'EUR' }}</div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                    {{ p.status }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm" [class]="p.stock_status === 'instock' ? 'text-green-600' : 'text-red-600'">
-                                    {{ p.stock_status === 'instock' ? 'Oui' : 'Non' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm" [class]="p.on_sale ? 'text-orange-600' : 'text-gray-600'">
-                                    {{ p.on_sale ? 'Oui' : 'Non' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm" [class]="p.featured ? 'text-yellow-600' : 'text-gray-600'">
-                                    {{ p.featured ? 'Oui' : 'Non' }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <a 
-                                    [href]="p.permalink" 
-                                    target="_blank"
-                                    class="text-blue-600 hover:text-blue-800 font-medium"
-                                >
-                                    Voir
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <!-- Loading State -->
+  <div *ngIf="loading" class="bg-white rounded-lg shadow-sm border p-8 text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+    <p class="text-gray-600">Chargement des produits...</p>
+  </div>
 
-        <!-- Submit Catalog Button -->
-        <div class="mt-6 flex justify-center">
-            <button 
-                (click)="submitCatalog()"
-                class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-            >
-                <i class="fas fa-paper-plane mr-2"></i>
-                Envoyer catalogue
-            </button>
-        </div>
+  <!-- Products Table -->
+  <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="px-6 py-3 text-left">
+              <label class="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="selectAllProducts"
+                  (change)="toggleSelectAllProducts()"
+                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span class="ml-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sélectionner tout
+                </span>
+              </label>
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">En solde</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vedette</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégories</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let p of products" 
+              class="hover:bg-gray-50 transition-colors"
+              [class.bg-blue-50]="isProductSelected(p.id)">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <label class="cursor-pointer">
+                <input
+                  type="checkbox"
+                  [checked]="isProductSelected(p.id)"
+                  (change)="toggleProductSelection(p.id)"
+                  class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+              </label>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img
+                [src]="p.images?.length ? p.images[0].src : '../../../assets/1719256397355-removebg-preview.png'"
+                [alt]="p.name || 'Product image'"
+                class="h-12 w-12 rounded-lg object-cover shadow-sm"
+                loading="lazy"
+              />
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900 max-w-xs truncate" [title]="p.name">
+                {{ p.name || 'Sans nom' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">
+                {{ p.price || '0' }} {{ p.currency || 'EUR' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': p.status === 'publish',
+                      'bg-yellow-100 text-yellow-800': p.status === 'draft',
+                      'bg-gray-100 text-gray-800': p.status === 'private'
+                    }">
+                {{ p.status || 'N/A' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': p.stock_status === 'instock',
+                      'bg-red-100 text-red-800': p.stock_status === 'outofstock'
+                    }">
+                <i class="fas fa-circle text-xs mr-1"></i>
+                {{ p.stock_status === 'instock' ? 'En stock' : 'Rupture' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm" [class]="p.on_sale ? 'text-orange-600 font-medium' : 'text-gray-600'">
+                <i *ngIf="p.on_sale" class="fas fa-percentage mr-1"></i>
+                {{ p.on_sale ? 'En solde' : 'Non' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm" [class]="p.featured ? 'text-yellow-600 font-medium' : 'text-gray-600'">
+                <i *ngIf="p.featured" class="fas fa-star mr-1"></i>
+                {{ p.featured ? 'Vedette' : 'Non' }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-600 max-w-xs">
+                <span *ngFor="let cat of p.categories; let last = last" 
+                      class="inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
+                  {{ cat.name }}
+                </span>
+                <span *ngIf="!p.categories || p.categories.length === 0" class="text-gray-400 italic">
+                  Aucune catégorie
+                </span>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center space-x-2">
+                <a
+                  [href]="p.permalink"
+                  target="_blank"
+                  class="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                  title="Voir le produit">
+                  <i class="fas fa-external-link-alt"></i>
+                </a>
+                <button
+                  class="text-gray-400 hover:text-gray-600"
+                  title="Plus d'options">
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="products.length === 0 && !loading" class="text-center py-12">
+      <i class="fas fa-search text-gray-400 text-4xl mb-4"></i>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun produit trouvé</h3>
+      <p class="text-gray-600 mb-4">Essayez de modifier vos critères de recherche ou de réinitialiser les filtres.</p>
+      <button
+        (click)="resetFilters()"
+        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+        <i class="fas fa-undo mr-2"></i>
+        Réinitialiser les filtres
+      </button>
+    </div>
+  </div>
+
+  <!-- Actions flottantes pour mobile -->
+  <div *ngIf="getSelectedCount() > 0" 
+       class="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border p-4 md:hidden z-50">
+    <div class="text-sm text-gray-600 mb-2">{{ getSelectedCount() }} sélectionné(s)</div>
+    <div class="flex space-x-2">
+
+      <button
+        (click)="exportSelectedProducts()"
+        class="flex items-center space-x-1 px-3 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 transition-colors">
+        <i class="fas fa-download"></i>
+        <span>Export</span>
+      </button>
+     
+    </div>
+  </div>
+</div>
