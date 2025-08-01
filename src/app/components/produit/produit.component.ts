@@ -1,11 +1,10 @@
-import { Component, OnInit } from "@angular/core"
+import { Component, type OnInit } from "@angular/core"
 import { CommonModule } from "@angular/common"
 import { FormsModule } from "@angular/forms"
 import { NgSelectModule } from "@ng-select/ng-select"
 import { ToastrService } from "ngx-toastr"
 import Swal from "sweetalert2"
 import { ProductsService } from "../../services/ProductsService"
-import { CatalogService } from "../../services/CatalogService"
 
 interface FilterOption {
   value: string
@@ -23,6 +22,24 @@ interface FilterGroup {
 interface SelectOption {
   value: string
   label: string
+}
+
+// Define the ProductDTO interface based on the Java DTO
+interface ProductDTO {
+  name: string
+  description?: string
+  price: number
+  stockQuantity: number
+  companyId?: string
+  archived: boolean
+  retailerId: string
+  currency: string
+  siteWeb: string
+  imageUrl: string
+  availability: string
+  retailerProductGroupId?: string
+  category?: string
+  wooCommerceId: string
 }
 
 @Component({
@@ -43,13 +60,12 @@ export class ProduitComponent implements OnInit {
   // Recherche par nom
   searchName = ""
 
-  // Options pour les sélecteurs
+  // Options pour les sélecteurs (kept for completeness, though not directly used in filters anymore)
   stockStatusOptions: SelectOption[] = [
     { value: "all", label: "Tous les statuts" },
     { value: "instock", label: "En stock" },
     { value: "outofstock", label: "Rupture de stock" },
   ]
-
   publicationStatusOptions: SelectOption[] = [
     { value: "all", label: "Tous les statuts" },
     { value: "publish", label: "Publié" },
@@ -57,7 +73,7 @@ export class ProduitComponent implements OnInit {
     { value: "private", label: "Privé" },
   ]
 
-  // Filtres sélectionnés
+  // Filtres sélectionnés (kept for completeness, though not directly used in filters anymore)
   selectedStockStatus = "all"
   selectedPublicationStatus = "all"
   selectedCategories: string[] = []
@@ -107,7 +123,6 @@ export class ProduitComponent implements OnInit {
 
   constructor(
     private productService: ProductsService,
-    private catalogService: CatalogService,
     private toastr: ToastrService,
   ) {}
 
@@ -160,13 +175,11 @@ export class ProduitComponent implements OnInit {
         })
       }
     })
-
     this.categoryFilters = Array.from(categories).map((cat) => ({
       value: cat,
       label: cat,
       checked: false,
     }))
-
     this.categoryOptions = [
       { value: "all", label: "Toutes les catégories" },
       ...Array.from(categories).map((cat) => ({
@@ -204,14 +217,12 @@ export class ProduitComponent implements OnInit {
 
   applyFilters(): void {
     let filteredProducts = [...this.allProducts]
-
     // Filtre par nom
     if (this.searchName.trim()) {
       filteredProducts = filteredProducts.filter((product) =>
         product.name?.toLowerCase().includes(this.searchName.toLowerCase()),
       )
     }
-
     // Filtres par groupes
     this.filterGroups.forEach((group) => {
       const selectedOptions = group.options.filter((option) => option.checked)
@@ -238,7 +249,6 @@ export class ProduitComponent implements OnInit {
         })
       }
     })
-
     // Filtre par catégories
     const selectedCategories = this.categoryFilters.filter((cat) => cat.checked)
     if (selectedCategories.length > 0) {
@@ -249,7 +259,6 @@ export class ProduitComponent implements OnInit {
         )
       })
     }
-
     this.products = filteredProducts
     this.updateProductSelectAllState()
   }
@@ -261,71 +270,20 @@ export class ProduitComponent implements OnInit {
     this.selectedCategories = []
     this.showOnSaleOnly = false
     this.showFeaturedOnly = false
-
     this.filterGroups.forEach((group) => {
       group.selectAll = false
       group.options.forEach((option) => {
         option.checked = false
       })
     })
-
     this.categoriesSelectAll = false
     this.categoryFilters.forEach((category) => {
       category.checked = false
     })
-
     this.products = [...this.allProducts]
     this.toastr.info("Filtres réinitialisés", "Information")
   }
 
-  async submitCatalog(): Promise<void> {
-    const result = await Swal.fire({
-      title: "Synchroniser tous les produits ?",
-      text: `Voulez-vous synchroniser ${this.products.length} produit(s) avec Meta ?`,
-      icon: "question",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Oui, synchroniser",
-      cancelButtonText: "Annuler",
-    })
-
-    if (result.isConfirmed) {
-      this.syncLoading = true
-      const payload = {
-        item_type: "PRODUCT_ITEM",
-        allow_upsert: false,
-        requests: this.products.map((p, idx) => ({
-          method: "CREATE",
-          retailer_id: `prod-${Date.now()}-${idx}`,
-          data: {
-            name: p.name || "",
-            description: p.description || "",
-            price: p.price || "0",
-            currency: p.currency || "EUR",
-            availability: p.stock_status || (p.stock_quantity > 0 ? "in stock" : "out of stock"),
-            image_url: p.images?.[0]?.src || p.image_url || "",
-            url: p.permalink || p.site_web || "",
-          },
-        })),
-      }
-
-      this.catalogService.submitCatalog(payload).subscribe({
-        next: (res) => {
-          console.log("Success:", res)
-          this.syncLoading = false
-          this.toastr.success(`${this.products.length} produit(s) synchronisé(s) avec succès`, "Succès")
-          Swal.fire("Synchronisé !", "Les produits ont été synchronisés avec Meta.", "success")
-        },
-        error: (err) => {
-          console.error("Error:", err)
-          this.syncLoading = false
-          this.toastr.error("Erreur lors de la synchronisation", "Erreur")
-          Swal.fire("Erreur !", "Une erreur est survenue lors de la synchronisation.", "error")
-        },
-      })
-    }
-  }
 
   toggleSelectAllProducts(): void {
     if (this.selectAllProducts) {
@@ -341,7 +299,7 @@ export class ProduitComponent implements OnInit {
 
   toggleProductSelection(productId: string): void {
     if (!productId) return
-    
+
     if (this.selectedProducts.has(productId)) {
       this.selectedProducts.delete(productId)
     } else {
@@ -351,7 +309,7 @@ export class ProduitComponent implements OnInit {
   }
 
   updateProductSelectAllState(): void {
-    const visibleProductIds = this.products.map((p) => p.id).filter(id => id)
+    const visibleProductIds = this.products.map((p) => p.id).filter((id) => id)
     this.selectAllProducts =
       visibleProductIds.length > 0 && visibleProductIds.every((id) => this.selectedProducts.has(id))
   }
@@ -364,17 +322,17 @@ export class ProduitComponent implements OnInit {
     return this.selectedProducts.size
   }
 
-  async submitSelectedCatalog(): Promise<void> {
+  async synchronizeWithDatabase(): Promise<void> {
     if (this.selectedProducts.size === 0) {
-      this.toastr.warning("Veuillez sélectionner au moins un produit", "Attention")
+      this.toastr.warning("Veuillez sélectionner au moins un produit à synchroniser", "Attention")
       return
     }
 
     const selectedProductsData = this.products.filter((p) => p.id && this.selectedProducts.has(p.id))
 
     const result = await Swal.fire({
-      title: "Synchroniser les produits sélectionnés ?",
-      text: `Voulez-vous synchroniser ${selectedProductsData.length} produit(s) sélectionné(s) avec Meta ?`,
+      title: "Synchroniser les produits sélectionnés avec la base de données ?",
+      text: `Voulez-vous synchroniser ${selectedProductsData.length} produit(s) sélectionné(s) avec la base de données ?`,
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
@@ -385,49 +343,56 @@ export class ProduitComponent implements OnInit {
 
     if (result.isConfirmed) {
       this.syncLoading = true
-      const payload = {
-        item_type: "PRODUCT_ITEM",
-        allow_upsert: false,
-        requests: selectedProductsData.map((p, idx) => ({
-          method: "CREATE",
-          retailer_id: `prod-${Date.now()}-${idx}`,
-          data: {
-            name: p.name || "",
-            description: p.description || "",
-            price: p.price || "0",
-            currency: p.currency || "EUR",
-            availability: p.stock_status || (p.stock_quantity > 0 ? "in stock" : "out of stock"),
-            image_url: p.images?.[0]?.src || p.image_url || "",
-            url: p.permalink || p.site_web || "",
-          },
-        })),
+      let successCount = 0
+      let errorCount = 0
+
+      for (const p of selectedProductsData) {
+        const productDto: ProductDTO = {
+          name: p.name || "",
+          description: p.description || "",
+          price: Number.parseFloat(p.price) || 0, 
+          stockQuantity: p.stock_quantity || 0,
+          companyId: "your_company_id", 
+          archived: p.archived || false,
+          retailerId: p.retailer_id || `prod-${Date.now()}-${p.id}`, 
+          currency: p.currency || "EUR",
+          siteWeb: p.permalink || p.site_web || "",
+          imageUrl: p.images?.[0]?.src || p.image_url || "",
+          availability: p.stock_status || (p.stock_quantity > 0 ? "in stock" : "out of stock"),
+          retailerProductGroupId: p.retailer_product_group_id || null,
+          category: p.categories?.[0]?.name || null,
+          wooCommerceId: p.id,
+        }
+
+        try {
+          await this.productService.saveProduct(productDto).toPromise()
+          successCount++
+        } catch (err) {
+          console.error(`Error saving product ${p.id}:`, err)
+          errorCount++
+        }
       }
 
-      this.catalogService.submitCatalog(payload).subscribe({
-        next: (res) => {
-          console.log("Success:", res)
-          this.syncLoading = false
-          this.toastr.success(`${selectedProductsData.length} produit(s) synchronisé(s) avec succès`, "Succès")
-          Swal.fire("Synchronisé !", "Les produits sélectionnés ont été synchronisés avec Meta.", "success")
-        },
-        error: (err) => {
-          console.error("Error:", err)
-          this.syncLoading = false
-          this.toastr.error("Erreur lors de la synchronisation", "Erreur")
-          Swal.fire("Erreur !", "Une erreur est survenue lors de la synchronisation.", "error")
-        },
-      })
+      this.syncLoading = false
+
+      if (successCount > 0 && errorCount === 0) {
+        this.toastr.success(`${successCount} produit(s) synchronisé(s) avec succès`, "Succès")
+        Swal.fire("Synchronisé !", "Les produits sélectionnés ont été synchronisés avec la base de données.", "success")
+      } else if (successCount > 0 && errorCount > 0) {
+        this.toastr.warning(`${successCount} produits synchronisés, ${errorCount} erreurs`, "Partiellement synchronisé")
+        Swal.fire("Partiellement Synchronisé !", `Certains produits ont été synchronisés avec des erreurs.`, "warning")
+      } else {
+        this.toastr.error("Erreur lors de la synchronisation de tous les produits", "Erreur")
+        Swal.fire("Erreur !", "Une erreur est survenue lors de la synchronisation.", "error")
+      }
     }
   }
-
- 
 
   exportSelectedProducts(): void {
     if (this.selectedProducts.size === 0) {
       this.toastr.warning("Veuillez sélectionner au moins un produit", "Attention")
       return
     }
-
     const selectedProductsData = this.products.filter((p) => p.id && this.selectedProducts.has(p.id))
     const csvContent = this.convertToCSV(selectedProductsData)
     this.downloadCSV(csvContent, "produits_selectionnes.csv")
@@ -437,7 +402,6 @@ export class ProduitComponent implements OnInit {
   private convertToCSV(products: any[]): string {
     const headers = ["Nom", "Prix", "Devise", "Statut", "Stock", "En solde", "Vedette", "Catégories"]
     const csvRows = [headers.join(",")]
-
     products.forEach((product) => {
       const row = [
         `"${product.name || ""}"`,
@@ -451,7 +415,6 @@ export class ProduitComponent implements OnInit {
       ]
       csvRows.push(row.join(","))
     })
-
     return csvRows.join("\n")
   }
 
