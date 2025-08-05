@@ -22,7 +22,7 @@ export class ConnectWoocommerceComponent {
   isLoading = false;
   errorMessage = '';
 
-  private apiUrl = 'https://bb53e6542e26.ngrok-free.app/api/generate-auth-url';
+  private apiUrl = 'https://70cbfc41dbf5.ngrok-free.app/api/generate-auth-url';
 
   constructor(
     private http: HttpClient,

@@ -10,8 +10,8 @@ import {ProductDTO} from "../shared/models/ProductDTO";
   providedIn: "root",
 })
 export class ProductsService {
-  private apiUrl = "https://bb53e6542e26.ngrok-free.app/api/products"
-  private statsUrl = "https://bb53e6542e26.ngrok-free.app/api/products/stats"
+  private apiUrl = "https://70cbfc41dbf5.ngrok-free.app/api/products"
+  private statsUrl = "https://70cbfc41dbf5.ngrok-free.app/api/products/stats"
 
   constructor(private http: HttpClient) {}
 
@@ -40,15 +40,33 @@ export class ProductsService {
   fetchProductStats(website: string): Observable<any> {
     return this.http.get<any>(`${this.statsUrl}?website=${website}`, { headers: this.getHeaders().headers })
   }
+getCanal(): string {
+  return 'web'; 
+}
+generateUUID(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0,
+          v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
 
- 
-  saveProduct(product: ProductDTO): Observable<any> {
+ saveProduct(productDtos: ProductDTO[]): Observable<any> {
+  const requestId = this.generateUUID();
+  const canal = this.getCanal();
 
-    return this.http.post<any>(`${this.apiUrl}/save`, product, this.getHeaders()).pipe(
-      catchError((error) => {
-        console.error("Error saving product:", error)
-        return throwError(() => new Error("Failed to save product"))
-      }),
-    )
-  }
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+    'x-api-requestId': requestId,
+    'x-api-canal': canal
+  });
+
+  return this.http.post<any>(`${this.apiUrl}/save`, productDtos, { headers }).pipe(
+    catchError((error) => {
+      console.error("Error saving product:", error);
+      return throwError(() => new Error("Failed to save product"));
+    })
+  );
+}
+
 }
