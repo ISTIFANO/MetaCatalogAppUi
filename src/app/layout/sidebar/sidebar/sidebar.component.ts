@@ -52,6 +52,10 @@ export class SidebarComponent {
     this.router.navigate(['/catalog']);
     this.closeSidebar();
   }
+    navigateToCatalogpage(): void {
+    this.router.navigate(['/produitsCatalog']);
+    this.closeSidebar();
+  }
   onUserProfileClick(): void {
   localStorage.clear();
   console.log('Local storage cleared');

@@ -1,0 +1,154 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center space-x-2">
+        <i class="fas fa-box text-blue-600"></i>
+        <span class="text-gray-600">Produits</span>
+        <i class="fas fa-chevron-right text-gray-400 text-sm"></i>
+        <span class="font-medium">Catalogue des produits</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <!-- Button to open the Meta synchronization modal -->
+        <button
+          (click)="openProductSelectionModal()"
+          class="flex items-center space-x-2 px-4 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
+        >
+          <i class="fas fa-sync-alt"></i>
+          <span>Synchroniser avec Meta</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="bg-white rounded-lg shadow-sm border p-8 text-center">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+    <p class="text-gray-600">Chargement des produits du catalogue...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-6" role="alert">
+    <strong class="font-bold">Erreur!</strong>
+    <span class="block sm:inline"> {{ error }}</span>
+  </div>
+
+  <!-- Products Table -->
+  <div *ngIf="!loading && !error && products.length > 0" class="bg-white rounded-lg shadow-sm border overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">En solde</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vedette</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégories</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr *ngFor="let p of products" class="hover:bg-gray-50 transition-colors">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <img
+                [src]="p.imageUrl || '/placeholder.svg?height=48&width=48'"
+                [alt]="p.name || 'Product image'"
+                class="h-12 w-12 rounded-lg object-cover shadow-sm"
+                loading="lazy"
+              />
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900 max-w-xs truncate" [title]="p.name">
+                {{ p.name || 'Sans nom' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm font-medium text-gray-900">
+                {{ p.price || '0' }} {{ p.currency || 'EUR' }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': p.status === 'publish',
+                      'bg-yellow-100 text-yellow-800': p.status === 'draft',
+                      'bg-gray-100 text-gray-800': p.status === 'private'
+                    }">
+                {{ p.status || 'N/A' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': p.availability === 'in stock',
+                      'bg-red-100 text-red-800': p.availability === 'out of stock'
+                    }">
+                <i class="fas fa-circle text-xs mr-1"></i>
+                {{ p.availability === 'in stock' ? 'En stock' : 'Rupture' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm" [class]="p.on_sale ? 'text-orange-600 font-medium' : 'text-gray-600'">
+                <i *ngIf="p.on_sale" class="fas fa-percentage mr-1"></i>
+                {{ p.on_sale ? 'En solde' : 'Non' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="text-sm" [class]="p.featured ? 'text-yellow-600 font-medium' : 'text-gray-600'">
+                <i *ngIf="p.featured" class="fas fa-star mr-1"></i>
+                {{ p.featured ? 'Vedette' : 'Non' }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="text-sm text-gray-600 max-w-xs">
+                <span *ngIf="p.category"
+                      class="inline-block bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-xs mr-1 mb-1">
+                  {{ p.category }}
+                </span>
+                <span *ngIf="!p.category" class="text-gray-400 italic">
+                  Aucune catégorie
+                </span>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="flex items-center space-x-2">
+                <a
+                  [href]="p.siteWeb"
+                  target="_blank"
+                  class="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                  title="Voir le produit"
+                >
+                  <i class="fas fa-external-link-alt"></i>
+                </a>
+                <button
+                  class="text-gray-400 hover:text-gray-600"
+                  title="Plus d'options"
+                >
+                  <i class="fas fa-ellipsis-v"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="products.length === 0 && !loading && !error" class="text-center py-12 bg-white rounded-lg shadow-sm border">
+    <i class="fas fa-box-open text-gray-400 text-4xl mb-4"></i>
+    <h3 class="text-lg font-medium text-gray-900 mb-2">Aucun produit trouvé dans le catalogue</h3>
+    <p class="text-gray-600 mb-4">Il n'y a pas de produits à afficher pour le moment.</p>
+  </div>
+</div>
+
+<!-- Product Selection Modal -->
+<app-product-selection-modal
+  *ngIf="showProductSelectionModal"
+  [allProducts]="products"
+  (submitSelected)="onProductsSelectedForMetaSync($event)"
+  (closeModal)="showProductSelectionModal = false"
+></app-product-selection-modal>
