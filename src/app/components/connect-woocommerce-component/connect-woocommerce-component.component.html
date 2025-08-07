@@ -1,0 +1,27 @@
+<!-- connect-woocommerce.component.html -->
+<div class="connect-container">
+  <h2>Connect Dashy avec votre WordPress</h2>
+  
+  <form (ngSubmit)="onSubmit()" class="connect-form">
+    <div class="form-group">
+      <label for="websiteUrl">URL de votre site WooCommerce</label>
+      <input 
+        type="url" 
+        id="websiteUrl" 
+        [(ngModel)]="websiteUrl" 
+        name="websiteUrl"
+        placeholder="https://votre-boutique.com"
+        required
+      >
+    </div>
+    
+    <div *ngIf="errorMessage" class="error-message">
+      {{ errorMessage }}
+    </div>
+    
+    <button type="submit" [disabled]="isLoading">
+      <span *ngIf="!isLoading">Connecter</span>
+      <span *ngIf="isLoading">Connexion en cours...</span>
+    </button>
+  </form>
+</div>

@@ -1,0 +1,14 @@
+<h2 mat-dialog-title>Autorisation WooCommerce</h2>
+<mat-dialog-content>
+  <p>
+    Pour connecter votre boutique WooCommerce
+    (<strong>{{ data.website }}</strong>), veuillez cliquer sur le lien ci-dessous :
+  </p>
+  <div class="auth-link">
+    <a (click)="openAuthLink()" href="#">{{ data.authUrl }}</a>
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onClose()">Fermer</button>
+  <button mat-raised-button color="primary" (click)="openAuthLink()">Ouvrir WooCommerce</button>
+</mat-dialog-actions>
