@@ -107,7 +107,7 @@ export class ProduitComponent implements OnInit {
       selectAll: false,
       options: [
         { value: "on_sale", label: "En solde", checked: false },
-        { value: "featured", label: "Produit vedette", checked: false },
+        { value: "featured", label: "produits favoris", checked: false },
       ],
     },
   ]
@@ -124,7 +124,7 @@ export class ProduitComponent implements OnInit {
   constructor(
     private productService: ProductsService,
     private toastr: ToastrService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     const saved = localStorage.getItem("woocommerceWebsite")
@@ -347,25 +347,25 @@ export class ProduitComponent implements OnInit {
       let errorCount = 0
 
       for (const p of selectedProductsData) {
-        const productDto: ProductDTO = {
-          name: p.name || "",
-          description: p.description || "",
-          price: Number.parseFloat(p.price) || 0, 
-          stockQuantity: p.stock_quantity || 0,
-          companyId: "your_company_id", 
+        const productDtos: ProductDTO[] = selectedProductsData.map(p => ({
+          name: p.name,
+          description: p.description,
+          price: +p.price,
+          stockQuantity: p.stock_quantity,
+          companyId: "your_company_id",
           archived: p.archived || false,
-          retailerId: p.retailer_id || `prod-${Date.now()}-${p.id}`, 
+          retailerId: p.retailer_id || `prod-${Date.now()}-${p.id}`,
           currency: p.currency || "EUR",
           siteWeb: p.permalink || p.site_web || "",
           imageUrl: p.images?.[0]?.src || p.image_url || "",
           availability: p.stock_status || (p.stock_quantity > 0 ? "in stock" : "out of stock"),
           retailerProductGroupId: p.retailer_product_group_id || null,
           category: p.categories?.[0]?.name || null,
-          wooCommerceId: p.id,
-        }
+          wooCommerceId: p.id
+        }));
 
         try {
-          await this.productService.saveProduct(productDto).toPromise()
+          await this.productService.saveProduct(productDtos).toPromise()
           successCount++
         } catch (err) {
           console.error(`Error saving product ${p.id}:`, err)
