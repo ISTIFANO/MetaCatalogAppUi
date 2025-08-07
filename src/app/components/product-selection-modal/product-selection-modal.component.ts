@@ -20,6 +20,7 @@ interface FilterGroup {
 
 // Re-defining ProductDTO for clarity within this component
 interface ProductDTO {
+  id : number
   name: string
   description?: string
   price: number

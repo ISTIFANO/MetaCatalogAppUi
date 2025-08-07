@@ -7,6 +7,7 @@ import { ProductSelectionModalComponent } from "../product-selection-modal/produ
 
 // Define the ProductDTO interface based on the Java DTO
 interface ProductDTO {
+    id : number
   name: string
   description?: string
   price: number
@@ -39,15 +40,18 @@ export class ProduitCatalogComponent implements OnInit {
   syncLoading = false 
   error = ""
   showProductSelectionModal = false 
+  
   constructor(
     private catalogService: CatalogService,
     private toastr: ToastrService,
   ) {}
 
   ngOnInit(): void {
+    
     this.loading = true
     this.catalogService.fetchUnarchivedProducts().subscribe({
       next: (data) => {
+        
         this.products = data
         this.loading = false
       },
@@ -80,10 +84,10 @@ export class ProduitCatalogComponent implements OnInit {
 
     const payload = {
       item_type: "PRODUCT_ITEM",
-      allow_upsert: false, // Or true, depending on your Meta sync strategy
+      allow_upsert: false, 
       requests: selectedProductsData.map((p, idx) => ({
         method: "CREATE", 
-        retailer_id: p.retailerId || `prod-${Date.now()}-${idx}`, 
+        retailer_id: p.id, 
         data: {
           name: p.name || "",
           description: p.description || "",
